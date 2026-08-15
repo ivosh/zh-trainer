@@ -8,7 +8,7 @@
   --good: #6aa84f;
   --bad: #c0483c;
   --hint: #4a8db7;
-  --board-size: 340px;
+  --board-size: min(100vw - 12px, 600px);
   --radius: 12px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color-scheme: dark;
@@ -84,12 +84,13 @@ html, body {
 }
 
 /* ---------- layout ---------- */
-.view { padding: 12px 14px 20px; }
+/* the board runs edge to edge; text blocks get their own inset */
+.view { padding: 12px 6px 20px; }
 .toolbar {
   display: flex;
   gap: 8px;
   align-items: center;
-  margin-bottom: 10px;
+  margin: 0 6px 10px;
 }
 .toolbar select {
   flex: 1;
@@ -113,7 +114,7 @@ html, body {
   background: var(--panel);
   border-radius: var(--radius);
   padding: 8px 11px;
-  margin-bottom: 8px;
+  margin: 0 6px 8px;
   font-size: 14.5px;
   line-height: 1.4;
 }
@@ -147,7 +148,7 @@ html, body {
   padding: 3px 6px;
   background: var(--panel);
   border-radius: 8px;
-  margin: 5px 0;
+  margin: 5px 6px;
   overflow-x: auto;
 }
 .zh-pocket.active { outline: 2px solid var(--accent); }
@@ -155,19 +156,25 @@ html, body {
 
 .pocket-piece {
   position: relative;
-  width: 44px;
-  height: 44px;
-  border: 2px solid transparent;
+  width: 46px;
+  height: 46px;
+  border: 2px solid rgba(0,0,0,.35);
   border-radius: 8px;
-  background-color: var(--panel-2);
-  background-size: 82%;
+  /* always a light tile: black pieces must stay legible in dark mode */
+  background-color: #e6d8bc;
+  background-size: 84%;
   background-position: center;
   background-repeat: no-repeat;
   cursor: pointer;
   flex: 0 0 auto;
+  touch-action: none;
 }
-.pocket-piece:disabled { opacity: .45; cursor: default; }
-.pocket-piece.selected { border-color: var(--accent); background-color: #4a3a22; }
+.pocket-piece:disabled { opacity: .5; cursor: default; }
+.pocket-piece.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(208,139,52,.55);
+  background-color: #fff3dc;
+}
 .pocket-piece .count {
   position: absolute;
   right: 1px;
@@ -197,7 +204,7 @@ html, body {
   width: 12.5%;
   height: 12.5%;
   z-index: 5;
-  cursor: pointer;
+  pointer-events: none;
 }
 .drop-target::after {
   content: '';
@@ -209,17 +216,47 @@ html, body {
 }
 
 /* ---------- feedback + actions ---------- */
-.feedback { min-height: 46px; margin: 8px 0; font-size: 15px; }
+.feedback { min-height: 30px; margin: 8px 6px; font-size: 15px; }
 .feedback .ok { color: var(--good); }
 .feedback .bad { color: var(--bad); }
 .feedback .hint { color: var(--hint); }
 .feedback .shown { color: var(--accent); }
-.feedback .line {
-  color: var(--muted);
+
+/* stepper that replays the engine's follow-up on the board */
+.line-box { margin: 0 6px 8px; }
+.line-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.line-player { display: flex; align-items: center; gap: 6px; }
+.line-player .step {
+  flex: 0 0 auto;
+  width: 40px;
+  min-height: 40px;
+  font-size: 20px;
+  line-height: 1;
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid #000;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.line-moves {
+  flex: 1;
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  padding: 2px 0;
+}
+.ln-mv {
+  flex: 0 0 auto;
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid #000;
+  border-radius: 7px;
+  padding: 7px 9px;
   font-size: 14px;
-  margin-top: 3px;
+  cursor: pointer;
   font-variant-numeric: tabular-nums;
 }
+.ln-mv.current { background: var(--accent); color: #16130f; font-weight: 700; }
 
 .actions {
   display: flex;
@@ -228,7 +265,7 @@ html, body {
   position: sticky;
   bottom: calc(60px + env(safe-area-inset-bottom));
   background: var(--bg);
-  padding: 6px 0;
+  padding: 6px;
   z-index: 10;
 }
 .pattern-detail .actions, .data-section .actions { position: static; }
@@ -249,7 +286,7 @@ html, body {
 .btn.danger { background: #5a2b26; }
 
 .meta {
-  margin-top: 10px;
+  margin: 10px 6px 0;
   font-size: 13px;
   color: var(--muted);
   display: flex;
@@ -259,7 +296,7 @@ html, body {
 
 /* ---------- openings ---------- */
 .moves {
-  margin-top: 10px;
+  margin: 10px 6px 0;
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
@@ -273,8 +310,8 @@ html, body {
 .mv.mine { background: #3c4f30; }
 
 /* ---------- patterns ---------- */
-.lede { font-size: 15px; color: var(--text); margin-top: 0; }
-.pattern-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.lede { font-size: 15px; color: var(--text); margin: 0 6px 12px; }
+.pattern-list { display: flex; flex-direction: column; gap: 8px; margin: 0 6px 14px; }
 .pattern-card {
   text-align: left;
   background: var(--panel);
@@ -293,6 +330,7 @@ html, body {
 .pattern-card.active { border-left-color: var(--accent); background: var(--panel-2); }
 .pc-title { font-size: 15px; }
 .pc-count { color: var(--muted); font-size: 13px; white-space: nowrap; }
+.pattern-detail { margin: 0 6px; }
 .pattern-detail h3 { margin: 0 0 6px; font-size: 17px; color: var(--accent); }
 .pattern-detail p { font-size: 15px; }
 
@@ -300,7 +338,7 @@ html, body {
 .scorecard {
   display: flex;
   gap: 8px;
-  margin-bottom: 14px;
+  margin: 0 6px 14px;
 }
 .scorecard div {
   flex: 1;
@@ -315,6 +353,7 @@ html, body {
 .scorecard span:last-child { font-size: 12px; color: var(--muted); }
 
 .headline {
+  margin: 0 6px 12px;
   font-size: 17px;
   font-weight: 600;
   background: var(--panel);
@@ -326,7 +365,7 @@ html, body {
   background: var(--panel);
   border-radius: var(--radius);
   padding: 12px 14px;
-  margin-bottom: 12px;
+  margin: 0 6px 12px;
 }
 .rep-section h3, .plan-item h3 { margin: 0 0 8px; font-size: 16px; color: var(--accent); }
 .rep-section .stat {
@@ -338,7 +377,7 @@ html, body {
 .rep-section p, .plan-item p { font-size: 15px; margin: 8px 0; }
 .rep-section ul { margin: 8px 0; padding-left: 20px; }
 .rep-section li { font-size: 15px; margin-bottom: 4px; }
-.plan-head { font-size: 19px; margin: 22px 0 10px; }
+.plan-head { font-size: 19px; margin: 22px 6px 10px; }
 .plan-item .num {
   display: inline-block;
   width: 24px; height: 24px;

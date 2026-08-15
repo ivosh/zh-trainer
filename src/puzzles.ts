@@ -1,16 +1,6 @@
-import { ZhBoard, sanOf, posFromFen } from './board';
+import { ZhBoard, sanOf, advanceFen, uciSquares } from './board';
 import { grade, getCard, pickNext, dueCount } from './store';
-import { parseUci } from 'chessops/util';
-import { makeFen } from 'chessops/fen';
 import type { Puzzle } from './data';
-
-function advance(fen: string, uci: string): string {
-  const pos = posFromFen(fen);
-  const mv = parseUci(uci);
-  if (!pos || !mv) throw new Error('bad move');
-  pos.play(mv);
-  return makeFen(pos.toSetup());
-}
 
 /**
  * Puzzle trainer. Deliberately untimed: the goal is recognising patterns,
@@ -26,6 +16,10 @@ export class PuzzleView {
   private failed = false;
   private el: HTMLElement;
   private filter = 'all';
+  private lineFens: string[] = [];
+  private lineSans: string[] = [];
+  private lineUcis: string[] = [];
+  private lineStep = 0;
 
   constructor(root: HTMLElement) {
     this.el = root;
@@ -53,6 +47,7 @@ export class PuzzleView {
         <div class="prompt" id="pz-prompt"></div>
         <div class="board-wrap" id="pz-board"></div>
         <div class="feedback" id="pz-feedback"></div>
+        <div class="line-box" id="pz-line"></div>
         <div class="actions">
           <button id="pz-hint" class="btn">Hint</button>
           <button id="pz-solution" class="btn">Show solution</button>
@@ -94,6 +89,10 @@ export class PuzzleView {
     this.solved = false;
     this.usedHint = false;
     this.failed = false;
+    this.lineFens = [];
+    this.lineSans = [];
+    this.lineUcis = [];
+    this.lineStep = 0;
     this.mount();
   }
 
@@ -101,6 +100,7 @@ export class PuzzleView {
     const p = this.puzzle!;
     const wrap = this.el.querySelector<HTMLElement>('#pz-board')!;
     const orientation = p.turn === 'w' ? 'white' : 'black';
+    this.board?.destroy();
     this.board = new ZhBoard(wrap, {
       fen: p.fen,
       orientation,
@@ -119,6 +119,8 @@ export class PuzzleView {
     this.el.querySelector('#pz-prompt')!.innerHTML =
       `<strong>${side} to play.</strong> ${ask}`;
     this.el.querySelector('#pz-feedback')!.innerHTML = '';
+    const lineEl = this.el.querySelector('#pz-line');
+    if (lineEl) lineEl.innerHTML = '';
     const due = dueCount(this.filtered().map(x => x.id));
     this.el.querySelector('#pz-due')!.textContent = `${due} due`;
     const c = getCard(p.id);
@@ -137,9 +139,11 @@ export class PuzzleView {
       this.board!.setViewOnly(true);
       const q = this.failed ? 0 : this.usedHint ? 1 : 2;
       grade(p.id, q);
-      const line = this.continuation(p);
       this.el.querySelector('#pz-feedback')!.innerHTML =
-        `<div class="ok">Correct: <strong>${p.solution_san}</strong>${line}</div>`;
+        `<div class="ok">Correct: <strong>${p.solution_san}</strong></div>`;
+      this.buildLine(p);
+      this.lineStep = 1;
+      this.renderLine();
     } else {
       this.failed = true;
       this.board!.shake();
@@ -151,19 +155,60 @@ export class PuzzleView {
     }
   }
 
-  /** Show the engine's follow-up so the idea, not just the move, is learned. */
-  private continuation(p: Puzzle): string {
-    if (!p.pv || p.pv.length < 2) return '';
-    const sans: string[] = [];
+  /**
+   * Step through the engine's follow-up on the board itself. Reading a bare
+   * move list is hard work; watching it play out is not.
+   */
+  private buildLine(p: Puzzle) {
+    this.lineFens = [p.fen];
+    this.lineSans = [];
+    this.lineUcis = [];
     let fen = p.fen;
-    for (const u of p.pv.slice(0, 5)) {
+    for (const u of (p.pv ?? []).slice(0, 6)) {
       try {
-        sans.push(sanOf(fen, u));
-        fen = advance(fen, u);
+        this.lineSans.push(sanOf(fen, u));
+        this.lineUcis.push(u);
+        fen = advanceFen(fen, u);
+        this.lineFens.push(fen);
       } catch { break; }
     }
-    return sans.length > 1
-      ? `<div class="line">Main line: ${sans.join(' ')}</div>` : '';
+    this.lineStep = 0;
+  }
+
+  private renderLine() {
+    const el = this.el.querySelector<HTMLElement>('#pz-line');
+    if (!el) return;
+    if (this.lineSans.length < 2) { el.innerHTML = ''; return; }
+    el.innerHTML = `
+      <div class="line-label">What follows &mdash; tap a move to see it</div>
+      <div class="line-player">
+        <button class="step" id="ln-prev" aria-label="Previous move">&#8249;</button>
+        <div class="line-moves" id="ln-moves"></div>
+        <button class="step" id="ln-next" aria-label="Next move">&#8250;</button>
+      </div>`;
+    const moves = el.querySelector<HTMLElement>('#ln-moves')!;
+    moves.innerHTML = this.lineSans.map((s, i) =>
+      `<button class="ln-mv${i === this.lineStep - 1 ? ' current' : ''}"
+         data-i="${i}">${s}</button>`).join('');
+    moves.querySelectorAll<HTMLButtonElement>('.ln-mv').forEach(b => {
+      b.onclick = () => this.gotoStep(+b.dataset.i! + 1);
+    });
+    el.querySelector<HTMLButtonElement>('#ln-prev')!.onclick =
+      () => this.gotoStep(this.lineStep - 1);
+    el.querySelector<HTMLButtonElement>('#ln-next')!.onclick =
+      () => this.gotoStep(this.lineStep + 1);
+  }
+
+  private gotoStep(i: number) {
+    const max = this.lineFens.length - 1;
+    this.lineStep = Math.max(0, Math.min(i, max));
+    const orientation = this.puzzle!.turn === 'w' ? 'white' : 'black';
+    const last = this.lineStep > 0
+      ? uciSquares(this.lineUcis[this.lineStep - 1]) : undefined;
+    this.board!.setFen(this.lineFens[this.lineStep], orientation, last);
+    this.board!.setViewOnly(true);
+    if (this.lineStep === 0) this.board!.drawArrow(this.puzzle!.solution);
+    this.renderLine();
   }
 
   private hint() {
@@ -190,7 +235,8 @@ export class PuzzleView {
     this.board!.drawArrow(p.solution);
     this.board!.setViewOnly(true);
     this.el.querySelector('#pz-feedback')!.innerHTML =
-      `<div class="shown">Solution: <strong>${p.solution_san}</strong>
-        ${this.continuation(p)}</div>`;
+      `<div class="shown">Solution: <strong>${p.solution_san}</strong></div>`;
+    this.buildLine(p);
+    this.renderLine();
   }
 }

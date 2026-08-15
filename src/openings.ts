@@ -61,6 +61,7 @@ export class OpeningView {
     this.idx = 0;
     this.mistakes = 0;
     const first = line.steps[0];
+    this.board?.destroy();
     this.board = new ZhBoard(this.el.querySelector<HTMLElement>('#op-board')!, {
       fen: first.fen,
       orientation: line.color,

@@ -92,11 +92,11 @@ export class PatternView {
     }
     const ex = p.examples[this.exIdx];
     this.revealed = false;
-    // show it from the attacker's side: this is the mate you keep allowing
-    const attacker = ex.my_color === 'white' ? 'black' : 'white';
+    // your own side at the bottom, exactly as you saw it in the game
+    this.board?.destroy();
     this.board = new ZhBoard(this.el.querySelector<HTMLElement>('#pt-board')!, {
       fen: ex.fen,
-      orientation: attacker as 'white' | 'black',
+      orientation: ex.my_color as 'white' | 'black',
       viewOnly: true,
       onMove: () => {},
     });

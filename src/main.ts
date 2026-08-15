@@ -79,15 +79,3 @@ function show(tab: TabId) {
 }
 
 show(current);
-
-// keep the board square and fully visible on small iPhone screens:
-// leave room for header, toolbar, prompt, both pockets, feedback and buttons
-function sizeBoard() {
-  const h = window.innerHeight;
-  const w = window.innerWidth;
-  const size = Math.min(w - 20, h - 420, 480);
-  document.documentElement.style.setProperty('--board-size', `${Math.max(240, size)}px`);
-}
-sizeBoard();
-window.addEventListener('resize', sizeBoard);
-window.addEventListener('orientationchange', () => setTimeout(sizeBoard, 200));

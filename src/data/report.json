@@ -1,0 +1,53 @@
+{
+ "generated": "2026-08-15",
+ "headline": "Your crazyhouse rating (1376) is not your strength. It is the average of a strong slow player and a player who runs out of time.",
+ "sections": [
+  {
+   "title": "1. The clock is costing you more than chess ever could",
+   "stat": "1317 of your 3655 losses (36%) were pure time forfeits.",
+   "body": "You lost on time 1317 times. That is not a chess problem, it is a format problem. Look at what happens as the clock shrinks:\n\n- 30+0: 327 games, 3.7% wins, 89.6% lost on time.\n- 60+0: 410 games, 12.7% wins, 72.7% lost on time.\n- 180+2: 946 games, 35.5% wins, 24.1% lost on time.\n- 300+3: 823 games, 37.2% wins, 6.9% lost on time.\n- 600+5: 105 games, 51.4% wins, 1.9% lost on time.\n\nAnd in correspondence, where you have all the time you want, you have won 93.5% of 139 games.\n\nYou are not a weak crazyhouse player. You are a slow one, and you have been playing formats that punish exactly that. This is the single biggest and easiest win available to you."
+  },
+  {
+   "title": "2. You get killed before move 25, not after",
+   "stat": "Games past move 45: 70.3% wins. Games ending in moves 10-20: 26.9%.",
+   "body": "- Games ending inside 20 moves: 2557 games, 26.9% wins.\n- Moves 20-30: 1700 games, 29.8% wins.\n- Moves 30-45: 977 games, 46.9% wins.\n- Past move 45: 360 games, 70.3% wins.\n\nIf you survive the opening you are the better player, by a wide margin. Your understanding is fine. What kills you is a fast, prepared attack in the first 20 moves that you have to solve from scratch at the board - which costs you both position and clock. This is why opening drilling matters more for you than for almost anyone else: it converts thinking time into recall time."
+  },
+  {
+   "title": "3. You are getting mated the same four ways",
+   "stat": "931 losses by checkmate, and the mating square is nearly always the same handful.",
+   "body": "The squares your opponents mate you on, in order: g7, g2, f7, f2, g8, e2, h7, e1, h8, f5.\n\nThat is two stories. Mates on g7/g2/h7/h2/g8/h8 are your castled king being blown open with dropped pieces - almost 300 losses. Mates on e2/e1/d1/f7/f2 are your uncastled king getting a queen or knight dropped next to it.\n\nImportant: your data says castling early does NOT help you (32.6% wins when you castle by move 7, vs 34.7% when you never castle). In crazyhouse castling often just tells the opponent where to aim. The fix is not 'castle sooner', it is 'count what the opponent holds in hand before you commit the king'."
+  },
+  {
+   "title": "4. Your biggest technical gap: you under-use drops",
+   "stat": "In 28% of your blunders the winning move was a drop and you moved a board piece instead.",
+   "body": "Engine analysis of 400 recent games found the pattern clearly:\n\n- 28% of blunders: the best move was a DROP, you played a board move. Mostly missed knight drops (302) and pawn drops (259).\n- 12% of blunders: you dropped a piece when a board move was better - usually an impulsive pawn drop (343 bad pawn drops).\n- You reached a clearly winning position and threw it away 542 times in 400 games.\n\nSo the habit to build is a two-part question before every move: 'what do I have in hand, and where does it go?' followed by 'if I play this, what does he have in hand, and where does it go?'. Pawn drops in particular are your weakness in both directions - you play too many bad ones and miss too many good ones."
+  },
+  {
+   "title": "5. Your openings, ranked by damage",
+   "stat": "Two Knights as Black: 195 games at 33.8%. vs Alekhine as White: 205 games at 22%.",
+   "body": "Worst results, weighted by how often they occur:\n\n- As Black after 1.e4 e5 2.Nf3 Nc6 3.Bc4 Nf6, you face 4.Ng5 (195 games, 33.8%), 4.O-O (61 games, 21.3%), 4.Bxf7+ (82 games, 30.5%). This one structure is over 500 games of your life.\n- As White against the Alekhine (1.e4 Nf6): 205 games, 22% wins.\n- As White against the Pirc/Rat (1.e4 d6): 96 games, 24% wins.\n- 1.d4 as White: 306 games at 25.2%, versus 1.e4 at 36.7%. Just stop playing 1.d4.\n\nThe good news: your Scotch (427 games, 39.6%) and your play against the Philidor (49.7%) and Sicilian (46.1%) are solid. Narrow your repertoire to what already works and drill the three disasters above."
+  }
+ ],
+ "plan": [
+  {
+   "title": "Change your time controls today",
+   "body": "Stop playing 30+0, 60+0 and 60+2 entirely. They are 924 games of pure rating loss and they teach you nothing. Play 300+3, 300+5, 600+5 and correspondence. Your win rate in 600+5 is 51%. If you only did this and nothing else, your rating would climb."
+  },
+  {
+   "title": "10 minutes of puzzles a day, untimed",
+   "body": "Use the Puzzles tab. Every position is from one of your own games, so you are fixing mistakes you actually make, not generic ones. There is no clock and no score - take a full minute per puzzle if you want. The app shows each position again days later, spaced out, which is how patterns stick at any age."
+  },
+  {
+   "title": "Drill three opening lines until they are automatic",
+   "body": "In the Openings tab, start with 'Two Knights: 4.Ng5', then 'vs Alekhine', then 'Two Knights: 4.O-O'. Run each line five times. The point is not memorising twenty moves - it is playing the first ten instantly so you arrive at move 12 with your clock intact and a position you recognise."
+  },
+  {
+   "title": "Learn the four mating nets cold",
+   "body": "The Patterns tab shows the four ways you actually get mated, with real positions from your losses. Spend a session just looking at them. The goal is that g7, g2, f7, f2, e2 and d1 start to feel dangerous automatically, the way a hot stove does."
+  },
+  {
+   "title": "Play one long game a day and analyse it",
+   "body": "One 600+5 or correspondence game, played properly, is worth more than twenty bullet games. Your correspondence record proves it. After it, run it through the Lichess analysis board and look only at the moves where you had a piece in hand and did not use it."
+  }
+ ]
+}

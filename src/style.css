@@ -415,3 +415,67 @@ html, body {
   .btn.primary { color: #fff; }
   .plan-item .num { color: #fff; }
 }
+
+/* ---------- opening explorer ---------- */
+.cand-list { margin: 0 6px 8px; display: flex; flex-direction: column; gap: 6px; }
+.cand {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  grid-template-areas: "san eval verdict" "yours yours yours";
+  align-items: center;
+  gap: 4px 10px;
+  background: var(--panel);
+  border: 1px solid #000;
+  border-left: 4px solid transparent;
+  border-radius: 10px;
+  padding: 10px 12px;
+  min-height: 48px;
+  cursor: pointer;
+}
+.cand.main { border-left-color: var(--accent); }
+.cand:active { background: var(--panel-2); }
+.c-san { grid-area: san; font-size: 17px; font-weight: 600; min-width: 62px; }
+.c-eval {
+  grid-area: eval;
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-width: 48px;
+}
+.c-verdict { grid-area: verdict; font-size: 13px; text-align: right; }
+.c-freq { grid-area: verdict; font-size: 13px; text-align: right; color: var(--muted); }
+.c-yours {
+  grid-area: yours;
+  font-size: 12px;
+  color: #e5b567;
+}
+.c-eval.good, .c-verdict.good { color: var(--good); }
+.c-eval.mid, .c-verdict.mid { color: #d8b24a; }
+.c-eval.bad, .c-verdict.bad { color: var(--bad); }
+.cand-sep {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+.cand-note { margin: 0 6px; font-size: 13px; color: var(--muted); }
+.preview { margin: 8px 6px 0; }
+
+/* ---------- collapses ---------- */
+.lesson {
+  background: var(--panel);
+  border-left: 4px solid var(--accent);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 0 6px 10px;
+}
+.lesson h3 { margin: 0 0 6px; font-size: 15px; color: var(--accent); }
+.lesson p { margin: 0; font-size: 14px; }
+.feedback .why {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.preview:not(:empty) { margin-bottom: 10px; }

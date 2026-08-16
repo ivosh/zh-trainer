@@ -4,18 +4,18 @@ import 'chessground/assets/chessground.brown.css';
 import 'chessground/assets/chessground.cburnett.css';
 
 import { PuzzleView } from './puzzles';
-import { OpeningView } from './openings';
-import { PatternView } from './patterns';
+import { ExplorerView } from './explorer';
+import { CollapseView } from './collapses';
 import { ReportView } from './report';
-import { puzzles, openings } from './data';
+import { puzzles, defencePuzzles, explorer } from './data';
 import { dueCount } from './store';
 
-type TabId = 'puzzles' | 'openings' | 'patterns' | 'plan';
+type TabId = 'puzzles' | 'openings' | 'collapses' | 'plan';
 
 const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: 'puzzles', label: 'Puzzles', icon: '&#9822;' },
   { id: 'openings', label: 'Openings', icon: '&#9814;' },
-  { id: 'patterns', label: 'Patterns', icon: '&#9819;' },
+  { id: 'collapses', label: 'Collapses', icon: '&#9819;' },
   { id: 'plan', label: 'Plan', icon: '&#9873;' },
 ];
 
@@ -31,12 +31,13 @@ app.innerHTML = `
 const main = document.querySelector<HTMLElement>('#main')!;
 const puzzleView = new PuzzleView(main);
 puzzleView.setPool(puzzles);
-const openingView = new OpeningView(main);
-openingView.setLines(openings);
-const patternView = new PatternView(main);
+const explorerView = new ExplorerView(main);
+explorerView.setLines(explorer);
+const collapseView = new CollapseView(main);
 const reportView = new ReportView(main);
 
 let current: TabId = (localStorage.getItem('zh-tab') as TabId) || 'puzzles';
+if (!TABS.some(t => t.id === current)) current = 'puzzles';
 
 function renderTabs() {
   const bar = document.querySelector<HTMLElement>('#tabbar')!;
@@ -63,12 +64,12 @@ function show(tab: TabId) {
       puzzleView.render();
       break;
     case 'openings':
-      sub.textContent = `${openings.length} lines from your repertoire`;
-      openingView.render();
+      sub.textContent = `${explorer.length} lines, with the engine's alternatives`;
+      explorerView.render();
       break;
-    case 'patterns':
-      sub.textContent = 'How you actually get mated';
-      patternView.render();
+    case 'collapses':
+      sub.textContent = `${defencePuzzles.length} games you could still have saved`;
+      collapseView.render();
       break;
     case 'plan':
       sub.textContent = 'Your analysis and plan';

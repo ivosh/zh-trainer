@@ -6,14 +6,21 @@ installed to the home screen.
 
 ## What is in it
 
-- **Puzzles** — 2,217 positions taken from my own games, each verified by
-  Fairy-Stockfish at depth 16 so that exactly one move is clearly best. They are
-  the moves I actually got wrong, plus the opponent mistakes I failed to punish.
-  Untimed, with spaced repetition so positions come back days later.
-- **Openings** — 18 drill lines built from my real repertoire. The app plays the
-  replies my opponents actually played, and asks for the engine's move.
-- **Patterns** — the four mating nets that account for most of my losses,
-  illustrated with real positions from those losses.
+- **Puzzles** — positions taken from my own games, each verified by
+  Fairy-Stockfish at depth 16 with a MultiPV search so exactly one move is
+  clearly best. They are the moves I actually got wrong, plus the opponent
+  mistakes I failed to punish. Nothing from the opening: every position is from
+  move 8 onwards. Untimed, with spaced repetition so positions come back days
+  later.
+- **Openings** — an explorer over my real repertoire rather than a drill. At
+  every one of my turns it shows the engine's top three moves with evaluations,
+  marks the move I habitually play there, and plays any of them out on the board
+  so the reason is visible rather than just the answer.
+- **Collapses** — the hard one. A mate you allowed one move earlier teaches
+  nothing, so for each game lost by checkmate this finds the earliest moment
+  where the position was still holdable and my move made it lost, and asks for
+  the move that would have held. Those moments sit 3 to 12 moves before the
+  mate.
 - **Plan** — the analysis and the training plan it produced.
 
 ## Install on iPhone

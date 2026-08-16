@@ -34,6 +34,7 @@ export class CollapseView {
   private puzzle?: Puzzle;
   private solved = false;
   private failed = false;
+  private shown = new Set<string>();
 
   constructor(el: HTMLElement) {
     this.el = el;
@@ -98,8 +99,11 @@ export class CollapseView {
       this.el.querySelector('#cl-board')!.innerHTML = '';
       return;
     }
-    const id = pickNext(pool.map(p => p.id), this.puzzle?.id);
+    const ids = pool.map(p => p.id);
+    if (this.shown.size >= ids.length) this.shown.clear();
+    const id = pickNext(ids, this.shown);
     this.puzzle = pool.find(p => p.id === id) ?? pool[0];
+    this.shown.add(this.puzzle.id);
     this.solved = false;
     this.failed = false;
     this.mount();

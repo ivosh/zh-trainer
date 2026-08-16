@@ -20,6 +20,7 @@ export class PuzzleView {
   private lineSans: string[] = [];
   private lineUcis: string[] = [];
   private lineStep = 0;
+  private shown = new Set<string>();
 
   constructor(root: HTMLElement) {
     this.el = root;
@@ -84,8 +85,10 @@ export class PuzzleView {
       return;
     }
     const ids = pool.map(p => p.id);
-    const id = pickNext(ids, this.puzzle?.id);
+    if (this.shown.size >= ids.length) this.shown.clear();
+    const id = pickNext(ids, this.shown);
     this.puzzle = this.byId.get(id!) ?? pool[0];
+    this.shown.add(this.puzzle.id);
     this.solved = false;
     this.usedHint = false;
     this.failed = false;

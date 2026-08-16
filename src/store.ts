@@ -124,20 +124,24 @@ export function newCount(ids: string[]): number {
 
 /**
  * Pick the next card: due reviews first (most overdue), then unseen ones.
- * Keeps daily load predictable instead of dumping the whole backlog.
+ * `exclude` holds the cards already shown in this session, so pressing Next
+ * keeps moving forward even when nothing has been graded yet.
  */
-export function pickNext(ids: string[], avoid?: string): string | undefined {
+export function pickNext(ids: string[], exclude?: Iterable<string>): string | undefined {
   const now = Date.now();
+  const skip = new Set(exclude ?? []);
+  const notSkipped = (id: string) => !skip.has(id);
   const seen = ids.filter(id => store.cards[id]);
   const due = seen
-    .filter(id => store.cards[id].due <= now && id !== avoid)
+    .filter(id => store.cards[id].due <= now && notSkipped(id))
     .sort((a, b) => store.cards[a].due - store.cards[b].due);
   if (due.length) return due[0];
-  const fresh = ids.filter(id => !store.cards[id] && id !== avoid);
+  const fresh = ids.filter(id => !store.cards[id] && notSkipped(id));
   if (fresh.length) return fresh[0];
-  const rest = ids.filter(id => id !== avoid);
-  if (!rest.length) return ids[0];
-  return rest.sort((a, b) => getCard(a).due - getCard(b).due)[0];
+  // everything has been shown this session: start over from the least recent
+  const rest = ids.filter(notSkipped);
+  const pool = rest.length ? rest : ids;
+  return pool.slice().sort((a, b) => getCard(a).due - getCard(b).due)[0];
 }
 
 export function stats() {

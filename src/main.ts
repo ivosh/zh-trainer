@@ -9,6 +9,7 @@ import { CollapseView } from './collapses';
 import { ReportView } from './report';
 import { puzzles, defencePuzzles, explorer } from './data';
 import { dueCount } from './store';
+import { VERSION, onUpdateState, applyUpdate } from './version';
 
 type TabId = 'puzzles' | 'openings' | 'collapses' | 'plan';
 
@@ -22,11 +23,19 @@ const TABS: { id: TabId; label: string; icon: string }[] = [
 const app = document.querySelector<HTMLDivElement>('#app')!;
 app.innerHTML = `
   <header class="app-header">
-    <h1>Crazyhouse Trainer</h1>
+    <h1>Crazyhouse Trainer <span class="ver-tag">${VERSION}</span></h1>
     <span class="sub" id="hdr-sub"></span>
   </header>
+  <div id="update-bar" hidden>
+    <span>A new version is ready.</span>
+    <button id="update-now">Reload</button>
+  </div>
   <main id="main"></main>
   <nav class="tabbar" id="tabbar"></nav>`;
+
+const updateBar = document.querySelector<HTMLElement>('#update-bar')!;
+document.querySelector<HTMLButtonElement>('#update-now')!.onclick = () => void applyUpdate();
+onUpdateState(s => { updateBar.hidden = s !== 'ready'; });
 
 const main = document.querySelector<HTMLElement>('#main')!;
 const puzzleView = new PuzzleView(main);

@@ -1,5 +1,8 @@
 import { report } from './data';
 import { stats, studiedToday, exportProgress, importProgress, resetAll } from './store';
+import {
+  VERSION, BUILT_AT, CONTENT, checkForUpdate, applyUpdate, updateState,
+} from './version';
 
 /** Your analysis and training plan, in plain language. */
 export class ReportView {
@@ -55,6 +58,20 @@ export class ReportView {
           </div>
           <textarea id="rp-box" rows="3" placeholder="progress data appears here"></textarea>
         </section>
+
+        <section class="rep-section version-section">
+          <h3>Version</h3>
+          <dl class="ver">
+            <dt>Build</dt><dd><code>${VERSION}</code></dd>
+            <dt>Built</dt><dd>${BUILT_AT}</dd>
+            <dt>Content</dt><dd>${CONTENT.puzzles} puzzles &middot;
+              ${CONTENT.collapses} collapses &middot; ${CONTENT.openings} opening lines</dd>
+          </dl>
+          <div class="actions">
+            <button class="btn" id="rp-check">Check for updates</button>
+          </div>
+          <p class="ver-status" id="rp-status"></p>
+        </section>
       </div>`;
 
     const box = this.el.querySelector<HTMLTextAreaElement>('#rp-box')!;
@@ -70,6 +87,29 @@ export class ReportView {
       if (confirm('Erase all your training progress?')) {
         resetAll();
         this.render();
+      }
+    };
+
+    const status = this.el.querySelector<HTMLElement>('#rp-status')!;
+    const describe = (s: string) => ({
+      current: 'You have the latest version.',
+      updating: 'Checking\u2026',
+      ready: 'A new version is ready. Reload to use it.',
+      offline: 'No connection, so this cannot be checked right now.',
+      unsupported: 'This browser cannot check automatically; reload the page instead.',
+    }[s] ?? '');
+    status.textContent = describe(updateState());
+
+    const check = this.el.querySelector<HTMLButtonElement>('#rp-check')!;
+    check.onclick = async () => {
+      check.disabled = true;
+      status.textContent = describe('updating');
+      const s = await checkForUpdate();
+      status.textContent = describe(s);
+      check.disabled = false;
+      if (s === 'ready') {
+        check.textContent = 'Reload now';
+        check.onclick = () => void applyUpdate();
       }
     };
   }

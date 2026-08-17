@@ -479,3 +479,49 @@ html, body {
 }
 
 .preview:not(:empty) { margin-bottom: 10px; }
+
+/* ---------- version and updates ---------- */
+.ver-tag {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--muted);
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+#update-bar {
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--accent);
+  color: #16130f;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+#update-bar[hidden] { display: none; }
+#update-bar button {
+  background: #16130f;
+  color: var(--accent);
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  min-height: 40px;
+  cursor: pointer;
+}
+.ver {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 0 0 10px;
+  font-size: 14px;
+}
+.ver dt { color: var(--muted); }
+.ver dd { margin: 0; }
+.ver code { font-family: ui-monospace, monospace; font-size: 13px; }
+.ver-status { font-size: 13px; color: var(--muted); margin: 8px 0 0; }

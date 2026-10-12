@@ -4,10 +4,10 @@ import 'chessground/assets/chessground.brown.css';
 import 'chessground/assets/chessground.cburnett.css';
 
 import { PuzzleView } from './puzzles';
-import { ExplorerView } from './explorer';
+import { OpeningCourseView } from './opening-course';
 import { CollapseView } from './collapses';
 import { ReportView } from './report';
-import { puzzles, defencePuzzles, explorer } from './data';
+import { puzzles, defencePuzzles, openingCourse } from './data';
 import { dueCount } from './store';
 import { VERSION, onUpdateState, applyUpdate } from './version';
 
@@ -40,13 +40,12 @@ onUpdateState(s => { updateBar.hidden = s !== 'ready'; });
 const main = document.querySelector<HTMLElement>('#main')!;
 const puzzleView = new PuzzleView(main);
 puzzleView.setPool(puzzles);
-const explorerView = new ExplorerView(main);
-explorerView.setLines(explorer);
+const openingView = new OpeningCourseView(main, openingCourse);
 const collapseView = new CollapseView(main);
 const reportView = new ReportView(main);
 
-let current: TabId = (localStorage.getItem('zh-tab') as TabId) || 'puzzles';
-if (!TABS.some(t => t.id === current)) current = 'puzzles';
+let current: TabId = (localStorage.getItem('zh-tab') as TabId) || 'openings';
+if (!TABS.some(t => t.id === current)) current = 'openings';
 
 function renderTabs() {
   const bar = document.querySelector<HTMLElement>('#tabbar')!;
@@ -63,7 +62,9 @@ function renderTabs() {
 }
 
 function show(tab: TabId) {
+  if (current === 'openings') openingView.dispose();
   current = tab;
+  app.classList.toggle('wide', tab === 'openings');
   localStorage.setItem('zh-tab', tab);
   window.scrollTo(0, 0);
   const sub = document.querySelector<HTMLElement>('#hdr-sub')!;
@@ -73,8 +74,8 @@ function show(tab: TabId) {
       puzzleView.render();
       break;
     case 'openings':
-      sub.textContent = `${explorer.length} lines, with the engine's alternatives`;
-      explorerView.render();
+      sub.textContent = `${openingCourse.lessons.length} opening lessons from your recent games`;
+      openingView.render();
       break;
     case 'collapses':
       sub.textContent = `${defencePuzzles.length} games you could still have saved`;

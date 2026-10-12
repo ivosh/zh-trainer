@@ -4,6 +4,7 @@ import puzzleData from './data/puzzles.json';
 import defenceData from './data/defence.json';
 import explorerData from './data/explorer.json';
 import reportData from './data/report.json';
+import openingCourseData from './data/opening_course.json';
 
 export interface Puzzle {
   id: string;
@@ -83,6 +84,55 @@ export interface ExplorerLine {
   nodes: ExplorerNode[];
 }
 
+export interface CourseCandidate {
+  uci: string;
+  san: string;
+  cp: number;
+  mate: number | null;
+  pvUci: string[];
+  pvSan: string[];
+  depth: number;
+}
+
+export interface CourseSources {
+  human1800: number;
+  humanOpponents: number;
+  ai5: number;
+  other: number;
+}
+
+export interface CourseStep {
+  ply: number;
+  fen: string;
+  mine: boolean;
+  selected: string;
+  selectedSan: string;
+  candidates: CourseCandidate[];
+  support: CourseSources;
+  idea: string;
+  threat: string;
+  watch: string;
+  eval: { cp: number; mate: number | null } | null;
+}
+
+export interface CourseLesson {
+  id: string;
+  name: string;
+  color: 'white' | 'black';
+  root: string[];
+  startPly: number;
+  sources: CourseSources;
+  steps: CourseStep[];
+}
+
+export interface OpeningCourse {
+  generated: string;
+  since: string;
+  lessonDepth: { minimumPly: number; maximumPly: number };
+  sources: CourseSources;
+  lessons: CourseLesson[];
+}
+
 export interface ReportSection {
   title: string;
   body: string;
@@ -108,4 +158,5 @@ export const defencePuzzles: Puzzle[] =
   }));
 
 export const explorer: ExplorerLine[] = explorerData as unknown as ExplorerLine[];
+export const openingCourse: OpeningCourse = openingCourseData as unknown as OpeningCourse;
 export const report: Report = reportData as unknown as Report;

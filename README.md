@@ -12,10 +12,10 @@ installed to the home screen.
   mistakes I failed to punish. Nothing from the opening: every position is from
   move 8 onwards. Untimed, with spaced repetition so positions come back days
   later.
-- **Openings** — an explorer over my real repertoire rather than a drill. At
-  every one of my turns it shows the engine's top three moves with evaluations,
-  marks the move I habitually play there, and plays any of them out on the board
-  so the reason is visible rather than just the answer.
+- **Openings** — guided lessons built from recent games against strong human and
+  AI opponents. The board asks for each course
+  move, offers hints and explains the engine line and the reply to watch. An
+  explorer lets me compare the prepared engine alternatives from each position.
 - **Collapses** — the hard one. A mate you allowed one move earlier teaches
   nothing, so for each game lost by checkmate this finds the earliest moment
   where the position was still holdable and my move made it lost, and asks for
@@ -49,4 +49,12 @@ cd ../zh-trainer && npm run build
 
 That pipeline parses the PGN into SQLite, scans the games with Fairy-Stockfish
 to find recurring mistakes, verifies candidate puzzles with a MultiPV search,
-builds the opening drills, and regenerates the report.
+builds the opening explorer, and regenerates the report.
+
+The opening course can be refreshed independently from the latest PGN:
+
+```bash
+cd ../zh-analysis
+.venv/bin/python make_opening_course.py <PGN>
+cd ../zh-trainer && npm run build
+```

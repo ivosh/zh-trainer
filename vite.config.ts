@@ -22,16 +22,17 @@ function countOf(file: string): number {
 const commit = git('rev-parse --short HEAD', 'dev');
 const commitDate = git('log -1 --format=%cd --date=format:%Y-%m-%d', 'unknown');
 const dirty = git('status --porcelain', '') !== '' ? '+' : '';
+const buildDate = new Date().toISOString().slice(0, 10);
 
 export default defineConfig({
   base: './',
   define: {
-    __APP_VERSION__: JSON.stringify(`${commitDate}.${commit}${dirty}`),
+    __APP_VERSION__: JSON.stringify(`${dirty ? buildDate : commitDate}.${commit}${dirty}`),
     __BUILT_AT__: JSON.stringify(new Date().toISOString().slice(0, 16).replace('T', ' ')),
     __CONTENT__: JSON.stringify({
       puzzles: countOf('puzzles.json'),
       collapses: countOf('defence.json'),
-      openings: countOf('explorer.json'),
+      openings: JSON.parse(readFileSync('./src/data/opening_course.json', 'utf8')).lessons.length,
     }),
   },
   plugins: [

@@ -95,7 +95,7 @@ export interface CourseCandidate {
 }
 
 export interface CourseSources {
-  human1800: number;
+  human1700: number;
   humanOpponents: number;
   ai5: number;
   other: number;
@@ -122,6 +122,7 @@ export interface CourseLesson {
   root: string[];
   startPly: number;
   sources: CourseSources;
+  opponents: Record<string, number>;
   steps: CourseStep[];
 }
 
@@ -130,6 +131,7 @@ export interface OpeningCourse {
   since: string;
   lessonDepth: { minimumPly: number; maximumPly: number };
   sources: CourseSources;
+  opponents: Record<string, number>;
   lessons: CourseLesson[];
 }
 

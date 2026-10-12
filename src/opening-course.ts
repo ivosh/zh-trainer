@@ -31,6 +31,7 @@ export class OpeningCourseView {
   private course: OpeningCourse;
   private root: HTMLElement;
   private line: CourseLesson;
+  private opponent: string;
   private idx = 0;
   private mode: Mode = 'practice';
   private pending = false;
@@ -43,15 +44,48 @@ export class OpeningCourseView {
   constructor(root: HTMLElement, course: OpeningCourse) {
     this.root = root;
     this.course = course;
+    this.opponent = localStorage.getItem('zh-opening-opponent') ?? '';
+    if (this.opponent !== '*' && this.opponent && !course.opponents?.[this.opponent]) {
+      this.opponent = '';
+    }
+    if (this.opponent && this.opponent !== '*' && !this.visibleLessons().length) {
+      this.opponent = '';
+    }
     const saved = localStorage.getItem('zh-opening-line');
-    this.line = course.lessons.find(line => line.id === saved) ?? course.lessons[0];
+    const lessons = this.visibleLessons();
+    this.line = lessons.find(line => line.id === saved) ?? lessons[0] ?? course.lessons[0];
     this.idx = this.line.startPly;
+  }
+
+  private visibleLessons(): CourseLesson[] {
+    const scenarios = this.course.lessons.filter(line => line.id.startsWith('opponent-'));
+    if (this.opponent === '*') {
+      return scenarios.sort((a, b) => b.sources.human1700 - a.sources.human1700 || a.name.localeCompare(b.name));
+    }
+    if (this.opponent) {
+      const matching = scenarios.filter(line => line.opponents?.[this.opponent]);
+      return matching.filter(line => !matching.some(other =>
+        other.color === line.color && other.root.length > line.root.length &&
+        line.root.every((move, index) => other.root[index] === move)))
+        .sort((a, b) => b.opponents[this.opponent] - a.opponents[this.opponent] ||
+          b.root.length - a.root.length || a.name.localeCompare(b.name));
+    }
+    return this.course.lessons.filter(line => !line.id.startsWith('opponent-'));
   }
 
   render() {
     this.root.innerHTML = `
       <div class="view course-view">
-        <div class="toolbar"><select id="co-line" aria-label="Opening lesson"></select></div>
+        <button id="co-choose" class="course-choice" type="button"
+          aria-controls="co-chooser" aria-expanded="false"></button>
+        <div class="toolbar course-toolbar" id="co-chooser" hidden>
+          <label>Opponent
+            <input id="co-opponent-search" type="search" aria-label="Find opponent"
+              placeholder="Find a player" autocomplete="off" autocapitalize="off" spellcheck="false">
+            <select id="co-opponent" aria-label="Opponent"></select>
+          </label>
+          <label>Opening<select id="co-line" aria-label="Opening lesson"></select></label>
+        </div>
         <div class="course-summary" id="co-summary"></div>
         <div class="course-modes" role="group" aria-label="Opening mode">
           <button id="co-practice" type="button">Practice</button>
@@ -72,22 +106,84 @@ export class OpeningCourseView {
         </div>
         <div class="moves course-moves" id="co-moves"></div>
       </div>`;
-    const select = this.root.querySelector<HTMLSelectElement>('#co-line')!;
-    select.innerHTML = this.course.lessons.map(line =>
-      `<option value="${html(line.id)}">${line.color === 'white' ? 'White' : 'Black'} · ${html(line.name)}</option>`,
+    const opponentSelect = this.root.querySelector<HTMLSelectElement>('#co-opponent')!;
+    const allOpponents = Object.entries(this.course.opponents ?? {})
+      .filter(([name]) => this.course.lessons.some(line => line.id.startsWith('opponent-') && line.opponents[name]))
+      .sort(([a, countA], [b, countB]) => countB - countA || a.localeCompare(b));
+    const frequent = allOpponents.slice(0, 20);
+    const remaining = allOpponents.slice(20).sort(([a], [b]) => a.localeCompare(b));
+    const options = (entries: [string, number][]) => entries.map(([name, games]) =>
+      `<option value="${html(name)}">${html(name)} · ${games} ${games === 1 ? 'game' : 'games'}</option>`,
     ).join('');
-    select.value = this.line.id;
+    const search = this.root.querySelector<HTMLInputElement>('#co-opponent-search')!;
+    const renderOpponentOptions = () => {
+      const term = search.value.trim().toLowerCase();
+      const matches = term ? allOpponents.filter(([name]) => name.includes(term)) : allOpponents;
+      const current = allOpponents.find(([name]) => name === this.opponent);
+      const selected = current && !matches.includes(current) ? options([current]) : '';
+      const choices = term
+        ? selected + (matches.length ? options(matches) : '<option disabled>No matching players</option>')
+        : `<optgroup label="Played most often">${options(frequent)}</optgroup>` +
+          `<optgroup label="Other players">${options(remaining)}</optgroup>`;
+      opponentSelect.innerHTML = '<option value="">Core course</option><option value="*">All 1700+ players</option>' +
+        choices;
+      opponentSelect.value = this.opponent;
+    };
+    search.oninput = renderOpponentOptions;
+    renderOpponentOptions();
+    opponentSelect.onchange = () => {
+      this.opponent = opponentSelect.value;
+      localStorage.setItem('zh-opening-opponent', this.opponent);
+      search.value = '';
+      renderOpponentOptions();
+      this.line = this.visibleLessons()[0];
+      localStorage.setItem('zh-opening-line', this.line.id);
+      this.renderLineOptions();
+      this.restart();
+      this.renderChoice();
+      this.setChooserOpen(false);
+    };
+    this.renderLineOptions();
+    const select = this.root.querySelector<HTMLSelectElement>('#co-line')!;
     select.onchange = () => {
-      this.line = this.course.lessons.find(line => line.id === select.value)!;
+      this.line = this.visibleLessons().find(line => line.id === select.value)!;
       localStorage.setItem('zh-opening-line', this.line.id);
       this.restart();
+      this.renderChoice();
+      this.setChooserOpen(false);
     };
+    this.root.querySelector<HTMLButtonElement>('#co-choose')!.onclick = () =>
+      this.setChooserOpen(Boolean(this.root.querySelector<HTMLElement>('#co-chooser')!.hidden));
+    this.renderChoice();
     this.root.querySelector<HTMLButtonElement>('#co-practice')!.onclick = () => this.setMode('practice');
     this.root.querySelector<HTMLButtonElement>('#co-explore')!.onclick = () => this.setMode('explore');
     this.root.querySelector<HTMLButtonElement>('#co-back')!.onclick = () => this.moveStep(-1);
     this.root.querySelector<HTMLButtonElement>('#co-next')!.onclick = () => this.next();
     this.root.querySelector<HTMLButtonElement>('#co-restart')!.onclick = () => this.restart();
     this.showStep();
+  }
+
+  private renderLineOptions() {
+    const select = this.root.querySelector<HTMLSelectElement>('#co-line')!;
+    const lessons = this.visibleLessons();
+    select.innerHTML = lessons.map(line =>
+      `<option value="${html(line.id)}">${line.color === 'white' ? 'White' : 'Black'} · ${html(line.name)}</option>`,
+    ).join('');
+    select.value = this.line.id;
+  }
+
+  private renderChoice() {
+    const opponent = this.opponent === '*' ? 'All 1700+ players' : this.opponent || 'Core course';
+    this.root.querySelector<HTMLButtonElement>('#co-choose')!.innerHTML =
+      `<span>${html(opponent)} · ${this.line.color === 'white' ? 'White' : 'Black'} · ${html(this.line.name)}</span><strong>Change</strong>`;
+  }
+
+  private setChooserOpen(open: boolean) {
+    const chooser = this.root.querySelector<HTMLElement>('#co-chooser')!;
+    const button = this.root.querySelector<HTMLButtonElement>('#co-choose')!;
+    if (!open && chooser.contains(document.activeElement)) button.focus();
+    chooser.hidden = !open;
+    button.setAttribute('aria-expanded', String(open));
   }
 
   dispose() {
@@ -172,12 +268,15 @@ export class OpeningCourseView {
     const movesToLearn = this.line.steps.slice(this.line.startPly).filter(item => item.mine);
     const solved = movesToLearn.filter(item => getCard(this.cardId(item)).reps > 0).length;
     const opponentWord = sources.humanOpponents === 1 ? 'opponent' : 'opponents';
-    const humanSummary = sources.human1800
-      ? `<strong>${sources.human1800}</strong> human 1800+ games from ${sources.humanOpponents} ${opponentWord}`
-      : '<strong>0</strong> human 1800+ games';
+    const humanSummary = sources.human1700
+      ? `<strong>${sources.human1700}</strong> human 1700+ games from ${sources.humanOpponents} ${opponentWord}`
+      : '<strong>0</strong> human 1700+ games';
+    const chosenOpponent = this.opponent && this.opponent !== '*'
+      ? `<strong>${html(this.opponent)}</strong> played this opening in <strong>${this.line.opponents[this.opponent]}</strong> ${this.line.opponents[this.opponent] === 1 ? 'game' : 'games'} · `
+      : '';
     const scenario = this.line.startPly ? ` · scenario starts at move ${Math.ceil((this.line.startPly + 1) / 2)}` : '';
     this.root.querySelector<HTMLElement>('#co-summary')!.innerHTML =
-      `${humanSummary} · ` +
+      `${chosenOpponent}${humanSummary} · ` +
       `<strong>${sources.ai5}</strong> AI level 5 games · through move ${moveCount}${scenario} · ` +
       `<strong>${solved}/${movesToLearn.length}</strong> solved`;
     this.root.querySelector('#co-practice')!.classList.toggle('active', this.mode === 'practice');
@@ -269,8 +368,8 @@ export class OpeningCourseView {
 
   private supportText(step: CourseStep): string {
     const s = step.support;
-    if (s.human1800 + s.ai5 + s.other === 0) return 'Engine continuation beyond matching games';
-    return `${s.human1800} human 1800+ · ${s.ai5} AI level 5 · ${s.other} other recent games followed this move`;
+    if (s.human1700 + s.ai5 + s.other === 0) return 'Engine continuation beyond matching games';
+    return `${s.human1700} human 1700+ · ${s.ai5} AI level 5 · ${s.other} other recent games followed this move`;
   }
 
   private renderExplore(panel: HTMLElement, step: CourseStep) {

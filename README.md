@@ -1,7 +1,7 @@
 # Crazyhouse Trainer
 
-A personal crazyhouse training app, built from an analysis of ~5,600 of my own
-Lichess crazyhouse games. It runs entirely in the browser and works offline once
+A personal crazyhouse training app, built from an analysis of my own Lichess
+crazyhouse games. It runs entirely in the browser and works offline once
 installed to the home screen.
 
 ## What is in it
@@ -13,9 +13,10 @@ installed to the home screen.
   move 8 onwards. Untimed, with spaced repetition so positions come back days
   later.
 - **Openings** — guided lessons built from recent games against strong human and
-  AI opponents. The board asks for each course
-  move, offers hints and explains the engine line and the reply to watch. An
-  explorer lets me compare the prepared engine alternatives from each position.
+  AI opponents. Choose a player to start from openings seen in their games. The
+  board asks for each course move, offers hints and explains the engine line
+  and the reply to watch. An explorer lets me compare the prepared engine
+  alternatives from each position.
 - **Collapses** — the hard one. A mate you allowed one move earlier teaches
   nothing, so for each game lost by checkmate this finds the earliest moment
   where the position was still holdable and my move made it lost, and asks for
@@ -54,7 +55,7 @@ builds the opening explorer, and regenerates the report.
 The opening course can be refreshed independently from the latest PGN:
 
 ```bash
-cd ../zh-analysis
-.venv/bin/python make_opening_course.py <PGN>
-cd ../zh-trainer && npm run build
+cd ../zh-trainer
+../zh-analysis/.venv/bin/python scripts/make_opening_course.py <PGN>
+npm run build
 ```

@@ -8,7 +8,6 @@
   --good: #6aa84f;
   --bad: #c0483c;
   --hint: #4a8db7;
-  --board-size: min(100vw - 12px, 600px);
   --radius: 12px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color-scheme: dark;
@@ -24,6 +23,8 @@ html, body {
   font-size: 17px;
   line-height: 1.5;
   overscroll-behavior-y: none;
+  overflow-x: clip;
+  touch-action: pan-y;
 }
 
 #app {
@@ -126,12 +127,14 @@ html, body {
 }
 
 /* ---------- board + pockets ---------- */
-.board-wrap { margin: 0 auto; width: var(--board-size); }
+.board-wrap { margin: 0 auto; width: 100%; max-width: 600px; }
 .zh-board {
-  width: var(--board-size);
-  height: var(--board-size);
+  width: 100%;
+  aspect-ratio: 1;
   position: relative;
+  touch-action: none;
 }
+.zh-board.cg-wrap coords.files { left: 0; width: 100%; }
 .zh-board.shake { animation: shake .35s; }
 @keyframes shake {
   0%,100% { transform: translateX(0); }
@@ -143,6 +146,7 @@ html, body {
 
 .zh-pocket {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   align-items: center;
   min-height: 34px;
@@ -150,7 +154,6 @@ html, body {
   background: var(--panel);
   border-radius: 8px;
   margin: 5px 6px;
-  overflow-x: auto;
 }
 .zh-pocket.active { outline: 2px solid var(--accent); }
 .pocket-empty { color: var(--muted); font-size: 12px; }
@@ -242,8 +245,8 @@ html, body {
 .line-moves {
   flex: 1;
   display: flex;
+  flex-wrap: wrap;
   gap: 5px;
-  overflow-x: auto;
   padding: 2px 0;
 }
 .ln-mv {
@@ -418,12 +421,67 @@ html, body {
 }
 
 /* ---------- opening explorer ---------- */
+.course-choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: calc(100% - 12px);
+  min-height: 44px;
+  margin: 0 6px 10px;
+  padding: 9px 11px;
+  border: 1px solid #000;
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+}
+.course-choice span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+.course-choice strong { flex: none; color: var(--accent); font-size: 13px; }
+.course-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+#co-chooser[hidden] { display: none; }
+.course-toolbar label {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 13px;
+  gap: 4px;
+}
+.course-toolbar select, .course-toolbar input {
+  width: 100%;
+  min-width: 0;
+}
+.course-toolbar select { flex: none; }
+.course-toolbar input {
+  min-height: 44px;
+  padding: 10px;
+  border: 1px solid #000;
+  border-radius: 8px;
+  background: var(--panel-2);
+  color: var(--text);
+  font-size: 14px;
+}
+@media (min-width: 700px) {
+  .course-toolbar { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); }
+}
 .course-summary {
   margin: 0 6px 10px;
   color: var(--muted);
   font-size: 13px;
 }
 .course-summary strong { color: var(--text); }
+.course-summary, .course-note, .course-explain { overflow-wrap: anywhere; }
 .course-modes {
   display: flex;
   gap: 6px;
@@ -444,7 +502,7 @@ html, body {
   color: #16130f;
   font-weight: 700;
 }
-.course-layout { display: grid; gap: 10px; }
+.course-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
 .course-side { min-width: 0; padding: 0 6px; }
 .course-eval {
   min-height: 0;

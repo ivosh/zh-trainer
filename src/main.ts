@@ -74,7 +74,7 @@ function show(tab: TabId) {
       puzzleView.render();
       break;
     case 'openings':
-      sub.textContent = `${openingCourse.lessons.length} opening lessons from your recent games`;
+      sub.textContent = `${openingCourse.lessons.length} opening lessons · ${openingCourse.sources.human1700} games vs 1700+ players`;
       openingView.render();
       break;
     case 'collapses':
